@@ -46,6 +46,15 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+crash.log
+crash.*.log
+**/inventory.ini
 # Logs
 *.log
 logs/

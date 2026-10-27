@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050507" />
+    <title>Cloud DevOps Engineer | Portfolio</title>
+    <style>
+        :root {
+            --bg: #05050c;
+            --panel: #0e0e16;
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text: #f5f5fb;
+            --muted: #9494a8;
+            --cyan: #37e7ff;
+            --purple: #a56bff;
+            --pink: #ff4fd8;
+            --green: #2bf784;
+            --font: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 100px;
+        }
+
+        /* Custom Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252536;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--purple);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            background-image:
+                linear-gradient(rgba(55, 231, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(55, 231, 255, 0.015) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text);
+            font-family: var(--font);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            width: min(1100px, calc(100% - 40px));
+            margin: auto;
+        }
+
+        /* Sticky Navigation Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            margin-top: 16px;
+            background: rgba(14, 14, 22, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            letter-spacing: .04em;
+            font-size: 1.1rem;
+        }
+
+        .logo span {
+            color: var(--cyan);
+        }
+
+        nav {
+            display: flex;
+            gap: 24px;
+            color: var(--muted);
+            font-size: .92rem;
+            font-weight: 500;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--cyan);
+        }
+
+        /* Hero Layout */
+        .hero {
+            min-height: calc(100vh - 140px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 40px;
+            padding: 40px 0 80px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--green);
+            font-size: .8rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            background: rgba(43, 247, 132, 0.08);
+            padding: 6px 14px;
+            border-radius: 99px;
+            border: 1px solid rgba(43, 247, 132, 0.2);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 15px var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 20px var(--green); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 4.5vw, 4rem);
+            line-height: 1.1;
+            letter-spacing: -.05em;
+            margin: 20px 0;
+            font-weight: 850;
+        }
+
+        h1 .gradient {
+            background: linear-gradient(100deg, var(--cyan), var(--purple) 45%, var(--pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .intro {
+            color: var(--muted);
+            font-size: 1.05rem;
+            max-width: 540px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 13px 22px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: 1px solid #252536;
+            background: #12121f;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--cyan);
+            box-shadow: 0 5px 15px rgba(55, 231, 255, 0.1);
+        }
+
+        .btn.primary {
+            background: linear-gradient(100deg, #37e7ff, #a56bff);
+            color: #05050c;
+            border: 0;
+        }
+
+        /* Interactive Terminal Styling */
+        .terminal-container {
+            background: #05050a;
+            border: 1px solid rgba(165, 107, 255, 0.2);
+            border-radius: 16px;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: #dcdce8;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(165, 107, 255, 0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        .terminal-bar {
+            background: #11111d;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            position: relative;
+        }
+
+        .terminal-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .t-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .t-close { background: #ff5f56; }
+        .t-min { background: #ffbd2e; }
+        .t-max { background: #27c93f; }
+
+        .terminal-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+        .terminal-body {
+            padding: 16px;
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .t-output-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .t-primary { color: var(--cyan); }
+        .t-success { color: var(--green); }
+        .t-warn { color: var(--pink); }
+
+        .t-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .t-prompt {
+            color: var(--purple);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .t-input-field {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            flex-grow: 1;
+            padding: 0;
+        }
+
+        /* General Section Blocks */
+        section { padding: 90px 0 30px; }
+        .section-title { font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.04em; margin: 0 0 8px; font-weight: 800; }
+        .section-sub { color: var(--muted); margin: 0 0 36px; font-size: 1.05rem; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .panel.hoverable:hover {
+            transform: translateY(-4px);
+            border-color: rgba(165, 107, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel .icon {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.04);
+            width: 50px;
+            height: 50px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+        }
+
+        .panel h3 { margin: 0 0 10px; font-size: 1.25rem; font-weight: 750; }
+        .panel p { color: var(--muted); margin: 0; font-size: .98rem; }
+
+        /* Badges */
+        .tags { display: flex; flex-wrap: wrap; gap: 12px; }
+        .tag {
+            border: 1px solid #222235; background: #0f0f1a; border-radius: 12px;
+            padding: 10px 16px; color: #e2e2f0; font-size: .92rem; font-weight: 600;
+        }
+        .tag:hover { transform: scale(1.05); background: #141424; cursor: default; }
+        .tag:nth-child(4n+1):hover { border-color: var(--cyan); box-shadow: 0 0 15px rgba(55,231,255,0.15); }
+        .tag:nth-child(4n+2):hover { border-color: var(--purple); box-shadow: 0 0 15px rgba(165,107,255,0.15); }
+        .tag:nth-child(4n+3):hover { border-color: var(--pink); box-shadow: 0 0 15px rgba(255,79,216,0.15); }
+        .tag:nth-child(4n):hover { border-color: var(--green); box-shadow: 0 0 15px rgba(43,247,132,0.15); }
+
+        .contact { display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap; }
+
+        .metrics-bar { display: flex; gap: 40px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.05); }
+        .metric-item b { display: block; font-size: 1.5rem; color: var(--cyan); }
+        .metric-item span { font-size: 0.85rem; color: var(--muted); }
+
+        footer {
+            border-top: 1px solid #161622; color: #646475; padding: 30px 0; font-size: .88rem;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+        }
+
+        .copied-toast {
+            position: fixed; bottom: 30px; right: 30px; background: var(--green); color: #05050c;
+            padding: 12px 20px; border-radius: 8px; font-weight: 700; box-shadow: 0 10px 25px rgba(43,247,132,0.3);
+            transform: translateY(100px); opacity: 0; z-index: 1000;
+        }
+        .copied-toast.show { transform: translateY(0); opacity: 1; }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; padding-top: 20px; gap: 40px; }
+            .intro { margin: auto; text-align: center; }
+            .actions, .metrics-bar { justify-content: center; }
+            .terminal-container { max-width: 540px; width: 100%; margin: auto; }
+        }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; gap: 16px; }
+            nav { gap: 16px; flex-wrap: wrap; justify-content: center; }
+            .contact { text-align: center; justify-content: center; }
+            .contact .actions { width: 100%; }
+            footer { justify-content: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrap">
+        <header>
+            <a class="logo" href="#home">Cloud<span> & </span>DevOps Engineer</a>
+            <nav aria-label="Main navigation" id="nav-menu">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#skills" class="nav-link">Skills</a>
+                <a href="#certifications" class="nav-link">Certifications</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero" id="home">
+                <div>
+                    <div class="eyebrow"><span class="dot"></span> Active Instance</div>
+                    <h1>I turn fragile infrastructure into resilient code.<br><span class="gradient">cloud systems.</span></h1>
+                    <p class="intro"><strong></strong>As a Cloud DevOps Engineer, I bridge the gap between development and production by writing modular Infrastructure as Code (Terraform, Ansible), orchestrating containerized environments (Kubernetes, Docker), and architecting zero-touch CI/CD pipelines.
+I don’t just collect DevOps tools—I integrate them to scale systems safely, optimize cloud spend, and help engineering teams ship code faster without breaking production.
+</p>
+
+                    <div class="actions">
+                        <a class="btn primary" href="#projects">Explore my work ↗</a>
+                        <a class="btn" href="#contact">Let’s connect</a>
+                    </div>
+
+                    <div class="metrics-bar">
+                        <div class="metric-item"><b>99.99%</b><span>Prod Target Uptime</span></div>
+                        <div class="metric-item"><b id="visitor-counter">1,402</b><span>Auto-Deployments Run</span></div>
+                    </div>
+                </div>
+
+                <div class="terminal-container" id="terminal-box">
+                    <div class="terminal-bar">
+                        <div class="terminal-btns">
+                            <div class="t-btn t-close"></div>
+                            <div class="t-btn t-min"></div>
+                            <div class="t-btn t-max"></div>
+                        </div>
+                        <div class="terminal-title">guest@devops-shell:~</div>
+                    </div>
+                    <div class="terminal-body" id="terminal-display">
+                        <div class="t-output-line t-primary">Welcome to the interactive portfolio terminal.</div>
+                        <div class="t-output-line">Type <span class="t-success">help</span> to view available system scripts.</div>
+                        <div class="t-input-row">
+                            <span class="t-prompt">guest~#</span>
+                            <input type="text" class="t-input-field" id="terminal-input" autofocus autocomplete="off" spellcheck="false" placeholder="type a command...">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about">
+                <h2 class="section-title">About me</h2>
+                <p class="section-sub">Bridging the gap between software development and production stability.</p>
+                <div class="panel">
+
+I approach DevOps not as a collection of tools, but as a culture of reliability, automation, and speed. My core focus is transforming manual, fragile deployment workflows into robust, self-healing cloud ecosystems that empower developers to ship code securely and instantly.
+
+How I Deliver Value:
+
+• Infrastructure as Code (IaC): I eliminate configuration drift by treating infrastructure exactly like software—versioned, tested, and provisioned via reusable Terraform modules and Ansible playbooks.
+
+• Container Orchestration: I design, secure, and scale high-availability workloads across AWS EKS (Kubernetes) and ECS, ensuring zero-downtime deployments and dynamic auto-scaling to save on cloud compute overhead.
+
+• Zero-Touch Automation: I build secure, defensive CI/CD environments (using GitHub Actions and Jenkins) wrapped with automated testing and vulnerability scanning, allowing teams to move fast without introducing vulnerabilities to production.
+
+I thrive in fast-paced environments where engineering velocity meets architecture stability. Let’s collaborate to build systems that scale safely.
+
+                    <br><br>
+                    <span style="color:var(--cyan); font-weight: 600;">Active technical focuses:</span> High-density container scaling, hybrid cloud security patterns, robust telemetry metrics platforms, and cost optimization tracking.
+                </div>
+            </section>
+
+            <section id="skills">
+                <h2 class="section-title">Tech stack</h2>
+                <p class="section-sub">Interactive skill layout. Hover over tags to see focus states.</p>
+
+                <div class="tags">
+			<h3>Cloud & Operating System</h3>
+			<div class="tags">
+                             <span class="tag">AWS </span>
+                             <span class="tag">Linux </span>
+			     <span class="tag">Microsoft 365</span>
+			     <span class="tag">Networking</span>
+			</div>
+			<h3>Infrastructure as Code & Configuration</h3>
+			<div class="tags">
+			     <span class="tag">Terraform</span>
+                             <span class="tag">Anisble</span>
+			</div>
+
+			<h3>CI/CD & Build Tools</h3>
+			<div class="tags">
+
+                             <span class="tag">Git</span>
+                             <span class="tag">Github</span>
+                             <span class="tag">Maven</span>
+                             <span class="tag">GitHub Actions</span>
+                             <span class="tag">Jenkins</span>
+			</div>
+			 <h3>Containers, Web & Databases</h3>
+                         <div class="tags">
+                             <span class="tag">Docker</span>
+                             <span class="tag">Nginx</span>
+                             <span class="tag">PostgreSQL</span>
+                        </div>
+
+			<h3>Automation</h3>
+                       <div class="tags">
+                    <span class="tag">Python </span>
+                    <span class="tag">Bash Scripting</span>
+                </div>
+            </section>
+
+            <section id="certifications">
+                <h2 class="section-title">Certifications</h2>
+                <p class="section-sub">Certifications covering network, IT support, security and cloud fundamentals.</p>
+                <div class="grid">
+                    <article class="panel hoverable"><div class="icon">🌐</div>  <h3>CCNA</h3><p>Cisco Certified Network Associate</p></article>
+                    <article class="panel hoverable"><div class="icon">🛠️</div><h3>CompTIA A+</h3><p>IT support and structural systems processing</p></article>
+                    <article class="panel hoverable"><div class="icon">🔌</div><h3>CompTIA Network+</h3><p>Advanced routing, infrastructure, and topographies</p></article>
+                    <article class="panel hoverable"><div class="icon">🛡️</div><h3>CompTIA Security+</h3><p>Infrastructure defense metrics and token security foundations</p></article>
+                </div>
+            </section>
+
+
+<section id="projects">
+    <h2 class="section-title">Featured Projects</h2>
+    <p class="section-sub">
+        Hands-on projects demonstrating cloud infrastructure, configuration management and deployment workflows.
+    </p>
+
+    <div class="grid">
+        <article class="panel hoverable">
+            <div class="icon" aria-hidden="true">☁️</div>
+            <h3>AWS Infrastructure with Terraform</h3>
+            <p>
+                Provisioned an EC2 instance using Terraform and AWS resources.
+                Practised infrastructure validation, variable management,
+                outputs and repeatable provisioning workflows.
+            </p>
+            <p><strong>Technologies:</strong> AWS, Terraform, Linux</p>
+            <a href="https://github.com/Trainroll/terraform-ansible-postgresql"
+               target="_blank"
+               rel="noopener noreferrer">
+                View project on GitHub ↗
+            </a>
+        </article>
+
+        <article class="panel hoverable">
+            <div class="icon" aria-hidden="true">🗄️</div>
+            <h3>PostgreSQL Configuration with Ansible</h3>
+            <p>
+                Automated PostgreSQL installation and service configuration
+                on Amazon Linux using Ansible. Verified connectivity,
+                service status and the installed PostgreSQL version.
+            </p>
+            <p><strong>Technologies:</strong> Ansible, PostgreSQL, Amazon Linux</p>
+            <a href="https://github.com/Trainroll/terraform-ansible-postgresql"
+               target="_blank"
+               rel="noopener noreferrer">
+                View project on GitHub ↗
+            </a>
+        </article>
+
+        <article class="panel hoverable">
+            <div class="icon" aria-hidden="true">🚀</div>
+            <h3>Java Yearbook DevOps Capstone</h3>
+            <p>
+                Building a deployment workflow for a Java application and
+                portfolio website. The planned architecture uses AWS,
+                Terraform, Ansible, Docker, Jenkins and Nginx.
+            </p>
+            <p><strong>Status:</strong> In progress</p>
+            <p><strong>Focus:</strong> Infrastructure provisioning, configuration
+                management and application delivery.</p>
+        </article>
+    </div>
+</section>
+
+
+            <section id="contact">
+                <div class="panel contact">
+                    <div>
+                        <h2 class="section-title">Let’s build something solid.</h2>
+                        <p class="section-sub" style="margin-bottom:0">Open to cloud architectural, site reliability, or pipeline orchestration spaces.</p>
+                    </div>
+                    <div class="actions" style="margin-top:0">
+                        <button class="btn primary" id="copy-email-btn">Copy Email Address</button>
+                        <a class="btn" href="https://github.com/Trainroll" target="_blank" rel="noreferrer">GitHub ↗</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+
+            <div>© <span id="year"></span> Bolarinwa Oluwatosin · Portfolio</div>
+            <div>Built for High Availability ⚡</div>
+        </footer>
+    </div>
+
+    <div class="copied-toast" id="toast-message">📋 Email address copied to clipboard!</div>
+
+"use strict";
+
+// Footer year
+const yearElement = document.getElementById("year");
+
+if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+}
+
+// Email clipboard action
+const emailAddress = "Bolarinwatosinn@gmail.com";
+const copyButton = document.getElementById("copy-email-btn");
+const toast = document.getElementById("toast-message");
+
+if (copyButton && toast) {
+    copyButton.addEventListener("click", async () => {
+        try {
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                throw new Error("Clipboard API unavailable");
+            }
+
+            await navigator.clipboard.writeText(emailAddress);
+
+            toast.textContent = "Email address copied to clipboard!";
+            toast.classList.add("show");
+        } catch (error) {
+            toast.textContent =
+                `Clipboard unavailable. Email: ${emailAddress}`;
+            toast.classList.add("show");
+        }
+    });
+}
+
+// Active navigation state
+const sections = document.querySelectorAll("main section[id]");
+const navLinks = document.querySelectorAll(".nav-link");
+
+function updateActiveNavigation() {
+    let currentSection = "";
+
+    sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= 150) {
+            currentSection = section.id;
+        }
+    });
+
+    navLinks.forEach((link) => {
+        const targetId = link.getAttribute("href")?.slice(1);
+        const isActive = targetId === currentSection;
+
+        link.classList.toggle("active", isActive);
+
+        if (isActive) {
+            link.setAttribute("aria-current", "location");
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+}
+
+window.addEventListener("scroll", updateActiveNavigation, {
+    passive: true
+});
+
+window.addEventListener("load", updateActiveNavigation);
+
+// Interactive terminal
+const terminalBox = document.getElementById("terminal-box");
+const terminalDisplay = document.getElementById("terminal-display");
+const terminalInput = document.getElementById("terminal-input");
+
+function printOutput(text, styleClass = "") {
+    if (!terminalDisplay || !terminalInput) return;
+
+    const line = document.createElement("div");
+    line.className = `t-output-line ${styleClass}`;
+    line.textContent = text;
+
+    terminalDisplay.insertBefore(line, terminalInput.parentNode);
+}
+
+function logCommandLine(commandText) {
+    if (!terminalDisplay || !terminalInput) return;
+
+    const row = document.createElement("div");
+    row.className = "t-output-line";
+
+    const prompt = document.createElement("span");
+    prompt.className = "t-prompt";
+    prompt.textContent = "guest~#";
+
+    const command = document.createElement("span");
+    command.textContent = ` ${commandText}`;
+
+    row.append(prompt, command);
+    terminalDisplay.insertBefore(row, terminalInput.parentNode);
+}
+
+function processCommand(command) {
+    switch (command) {
+        case "help":
+            printOutput("Available commands:", "t-primary");
+            printOutput("help     - Show available commands.");
+            printOutput("skills   - Show the technologies featured here.");
+            printOutput("projects - Show featured portfolio projects.");
+            printOutput("neofetch - Show this portfolio's demo environment.");
+            printOutput("clear    - Clear terminal output.");
+            break;
+
+        case "skills":
+            printOutput("Cloud: AWS, Linux");
+            printOutput("Infrastructure as Code: Terraform, Ansible");
+            printOutput("CI/CD and build tools: Jenkins, GitHub Actions, Maven");
+            printOutput("Containers and web: Docker, Nginx");
+            printOutput("Database: PostgreSQL");
+            break;
+
+        case "projects":
+            printOutput("1. AWS infrastructure provisioned with Terraform.");
+            printOutput("2. PostgreSQL configured on Amazon Linux with Ansible.");
+            printOutput("3. Java Yearbook DevOps capstone — in progress.");
+            break;
+
+        case "clear": {
+            const lines =
+                terminalDisplay?.querySelectorAll(".t-output-line") ?? [];
+
+            lines.forEach((line) => line.remove());
+            break;
+        }
+
+        case "neofetch":
+            printOutput("Portfolio Demo Environment", "t-primary");
+            printOutput("---------------------------");
+            printOutput("Interface: Browser-based terminal simulation");
+            printOutput("Purpose: Portfolio demonstration");
+            printOutput("Status: Ready for input", "t-success");
+            break;
+
+        default:
+            printOutput(
+                `Command not found: ${command}. Type 'help' for commands.`,
+                "t-warn"
+            );
+    }
+}
+
+if (terminalBox && terminalInput && terminalDisplay) {
+    terminalBox.addEventListener("click", () => {
+        terminalInput.focus();
+    });
+
+    terminalInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+
+        const originalCommand = terminalInput.value.trim();
+        const command = originalCommand.toLowerCase();
+
+        if (!command) return;
+
+        logCommandLine(originalCommand);
+        processCommand(command);
+
+        terminalInput.value = "";
+        terminalDisplay.scrollTop = terminalDisplay.scrollHeight;
+    });
+}
+
+    <script>
+
+    </script>
+</body>
+</html>

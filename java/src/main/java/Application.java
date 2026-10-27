@@ -335,12 +335,23 @@ public class Application {
                 <p class="quote">"Bloomy is an excellent choice for beginners..."</p>
             </div>
 
+	    <!-- Bolarinwa (fixed spelling) -->
+            <div class="trainee-card">
+                <div class="photo-box">
+                    <img src="/avatars/avatar.png" alt="Bolarinwa's tech avatar">
+                </div>
+                <h3 class="name">Bolarinwa</h3>
+                <div class="superlative">Platform Engineer Intern</div>
+                <p class="quote">"...head in the clouds, hands in the terminal. ☁️"</p>
+            </div>
+
+
         </div>
     </div>
 
     <div class="footer-marquee-container">
         <marquee behavior="scroll" direction="left">
-            Java Application Status: <strong>ONLINE</strong> • From broken code builds to live apps — we made it — Congratulations! • Powered by profAkymbo © 2026 
+            Java Application Status: <strong>ONLINE</strong> • From broken code builds to live apps — we made it — Congratulations! • Powered by profAkymbo © 2026
         </marquee>
     </div>
 

@@ -1,0 +1,78 @@
+- name: Configure capstone application server
+  hosts: app
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Upgrade installed packages
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+
+    - name: Install Docker
+      ansible.builtin.yum:
+        name: docker
+        state: present
+
+    - name: Create Docker CLI plugins directory
+      ansible.builtin.file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: "0755"
+
+    - name: Install Docker Buildx plugin
+      ansible.builtin.get_url:
+        url: https://github.com/docker/buildx/releases/download/v0.17.1/buildx-v0.17.1.linux-amd64
+        dest: /usr/local/lib/docker/cli-plugins/docker-buildx
+        mode: "0755"
+
+    - name: Enable and start docker
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create application deployment directory
+      ansible.builtin.file:
+        path: /opt/yearbook-capstone
+        state: directory
+        mode: "0755"
+
+    - name: Create Docker CLI plugins directory
+      ansible.builtin.file:
+        path: /usr/local/lib/docker/cli-plugins
+        state: directory
+        mode: "0755"
+
+    - name: Install Docker Compose plugin
+      ansible.builtin.get_url:
+        url: https://github.com/docker/compose/releases/download/v5.6.1/docker-compose-linux-x86_64
+        dest: /usr/local/lib/docker/cli-plugins/docker-compose
+        mode: "0755"
+
+    - name: Copy Docker Compose and Nginx Configuration
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /opt/yearbook-capstone/
+        mode: preserve
+      loop:
+        - ../docker-compose.yml
+        - ../nginx.conf
+        - ../docker-compose.prod.yml
+
+    - name: Copy portfolio directory including avatar assets
+      ansible.builtin.copy:
+        src: ../myportfolio
+        dest: /opt/yearbook-capstone/
+        mode: preserve
+
+    - name: Copy Java application directory
+      ansible.builtin.copy:
+        src: ../java
+        dest: /opt/yearbook-capstone/
+        mode: preserve
+
+    - name: Deploy capstone application with Docker Compose
+      ansible.builtin.command:
+        cmd: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+        chdir: /opt/yearbook-capstone

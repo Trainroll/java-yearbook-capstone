@@ -42,7 +42,12 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
+		   <transformers>
+    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+        <mainClass>Application</mainClass>
+    </transformer>
+</transformers>
+		    </configuration>
                     </execution>
                 </executions>
             </plugin>

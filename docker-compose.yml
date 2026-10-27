@@ -1,0 +1,19 @@
+
+services:
+  yearbook:
+    build:
+      context: ./java
+      dockerfile: Dockerfile
+    image: yearbook-app:1.0
+    restart: unless-stopped
+    expose:
+      - "8081"
+
+  portfolio:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./myportfolio:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8083:80"
