@@ -102,7 +102,19 @@ resource "aws_instance" "app" {
   }
 }
 
+resource "aws_eip" "app" {
+  domain = "vpc"
 
+  tags = {
+    Name    = "${var.project_name}-app-eip"
+    Project = var.project_name
+  }
+}
+
+resource "aws_eip_association" "app" {
+  instance_id   = aws_instance.app.id
+  allocation_id = aws_eip.app.id
+}
 
 resource "local_sensitive_file" "ansible_inventory" {
   filename        = "${path.module}/inventory.ini"
@@ -110,7 +122,7 @@ resource "local_sensitive_file" "ansible_inventory" {
 
   content = <<-EOT
     [app]
-    ${aws_instance.app.public_ip} ansible_user=ec2-user ansible_ssh_private_key_file=${var.ssh_private_key_path} ansible_python_interpreter=/usr/bin/python3
+    ${aws_eip.app.public_ip} ansible_user=ec2-user ansible_ssh_private_key_file=${var.ssh_private_key_path} ansible_python_interpreter=/usr/bin/python3
     EOT
 
   depends_on = [aws_instance.app]

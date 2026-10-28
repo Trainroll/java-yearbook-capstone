@@ -16,7 +16,7 @@ output "app_instance_id" {
 
 output "app_public_ip" {
   description = "Public IP of the application server"
-  value       = aws_instance.app.public_ip
+  value       = aws_eip.app.public_ip
 }
 
 output "app_security_group_id" {
@@ -33,5 +33,5 @@ output "ansible_inventory_path" {
 
 output "app_ssh_command" {
   description = "SSH command for the application server"
-  value       = "ssh -i ${var.ssh_private_key_path} ec2-user@${aws_instance.app.public_ip}"
+  value       = "ssh -i ${var.ssh_private_key_path} ec2-user@${aws_eip.app.public_ip}"
 }
