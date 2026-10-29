@@ -2,6 +2,13 @@
 pipeline {
     agent any
 
+parameters {
+    choice(
+        name: 'DEPLOYMENT_MODE',
+        choices: ['FULL', 'PORTFOLIO', 'JAVA'],
+        description: 'Select which application component to deploy'
+    )
+}
     environment {
         DEPLOY_HOST = '98.89.67.243'
     }
@@ -25,6 +32,12 @@ pipeline {
         }
 
         stage('Build Java Application') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'JAVA' ||
+                    params.DEPLOYMENT_MODE == 'FULL'
+                }
+            }
             steps {
                 sh 'mvn -f java/pom.xml clean package'
             }
@@ -54,6 +67,7 @@ EOF
                         ANSIBLE_HOST_KEY_CHECKING=True \
                             ansible-playbook \
                             -i "$INVENTORY" \
+			    -e "deployment_mode=${DEPLOYMENT_MODE}" \
                             ansible/playbook.yml
                     '''
                 }
@@ -65,19 +79,24 @@ EOF
                 sh '''
                     set -eu
 
-                    curl --fail --silent --show-error --max-time 15 \
-                        "http://${DEPLOY_HOST}/" > /dev/null
+                    if [ "$DEPLOYMENT_MODE" = "PORTFOLIO" ] || [ "$DEPLOYMENT_MODE" = "FULL" ]; then
+                        echo "Testing portfolio homepage..."
+                        curl --fail --silent --show-error --max-time 15 \
+                            "http://${DEPLOY_HOST}/" > /dev/null
+                        echo "Testing portfolio avatar..."
+                        curl --fail --silent --show-error --max-time 15 \
+                            "http://${DEPLOY_HOST}/avatars/avatar.png" > /dev/null
+                    fi
 
-                    curl --fail --silent --show-error --max-time 15 \
-                        "http://${DEPLOY_HOST}/yearbook/" > /dev/null
+                    if [ "$DEPLOYMENT_MODE" = "JAVA" ] || [ "$DEPLOYMENT_MODE" = "FULL" ]; then
+                        echo "Testing Java application through Nginx..."
+                        curl --fail --silent --show-error --max-time 15 \
+                            "http://${DEPLOY_HOST}/yearbook/" > /dev/null
+                    fi
 
-                    curl --fail --silent --show-error --max-time 15 \
-                        "http://${DEPLOY_HOST}/avatars/avatar.png" > /dev/null
-
-                    echo "All HTTP smoke tests passed."
+                    echo "HTTP smoke tests passed for ${DEPLOYMENT_MODE} deployment."
                 '''
-            }
-        }
-    }
+       }
+     }
+   }
 }
-

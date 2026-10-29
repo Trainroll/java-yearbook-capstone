@@ -1,4 +1,4 @@
 services:
   portfolio:
-    ports: !overide
+    ports: !override
       - "80:80"

@@ -52,27 +52,45 @@
 
     - name: Copy Docker Compose and Nginx Configuration
       ansible.builtin.copy:
-        src: "{{ item }}"
+        src: "{{ item.src }}"
         dest: /opt/yearbook-capstone/
         mode: preserve
       loop:
-        - ../docker-compose.yml
-        - ../nginx.conf
-        - ../docker-compose.prod.yml
+        - src: ../docker-compose.yml
+        - src: ../docker-compose.prod.yml
+      when: deployment_mode in ['PORTFOLIO', 'FULL']
+
+    - name: Copy Nginx Configuration
+      ansible.builtin.copy:
+        src: ../nginx.conf
+        dest: /opt/yearbook-capstone/nginx.conf
+        mode: preserve
+      when: deployment_mode in ['PORTFOLIO', 'FULL']
 
     - name: Copy portfolio directory including avatar assets
       ansible.builtin.copy:
         src: ../myportfolio
         dest: /opt/yearbook-capstone/
         mode: preserve
+      when: deployment_mode == 'PORTFOLIO' or deployment_mode == 'FULL'
 
     - name: Copy Java application directory
       ansible.builtin.copy:
         src: ../java
         dest: /opt/yearbook-capstone/
         mode: preserve
+      when: deployment_mode == 'JAVA' or deployment_mode == 'FULL'
 
-    - name: Deploy capstone application with Docker Compose
+    - name: Deploy Java application
+      become: true
       ansible.builtin.command:
-        cmd: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+        cmd: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build yearbook
         chdir: /opt/yearbook-capstone
+      when: deployment_mode in ['JAVA', 'FULL']
+
+    - name: Deploy portfolio service
+      become: true
+      ansible.builtin.command:
+        cmd: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d portfolio
+        chdir: /opt/yearbook-capstone
+      when: deployment_mode in ['PORTFOLIO', 'FULL']
