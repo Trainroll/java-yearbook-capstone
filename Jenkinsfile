@@ -5,7 +5,7 @@ pipeline {
 parameters {
     choice(
         name: 'DEPLOYMENT_MODE',
-        choices: ['FULL', 'PORTFOLIO', 'JAVA'],
+        choices: ['FULL', 'PORTFOLIO', 'JAVA', 'INFRASTRUCTURE'],
         description: 'Select which application component to deploy'
     )
 }
@@ -31,6 +31,119 @@ parameters {
             }
         }
 
+        stage('Terraform Validate') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
+                }
+            }
+            steps {
+                dir('terraform') {
+                    sh '''
+                        set -eu
+
+                        terraform fmt -check -recursive
+                        terraform init -backend=false
+                        terraform validate
+                    '''
+                }
+            }
+        }
+
+
+        stage('Terraform Backend Init') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
+                }
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-terraform-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                            set +x
+                            terraform init -input=false -reconfigure
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
+                }
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-terraform-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                            set +x
+                            terraform plan \
+                                -input=false \
+                                -lock-timeout=5m \
+                                -out=tfplan
+			     terraform show -no-color tfplan
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Approve Terraform Apply') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
+                }
+            }
+            steps {
+                input(
+                    message: 'Review the Terraform plan. Approve only if the proposed changes are expected.',
+                    ok: 'Approve Terraform Apply'
+                )
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression {
+                    params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
+                }
+            }
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-terraform-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                            set +x
+                            terraform apply \
+                                -input=false \
+                                -lock-timeout=5m \
+                                tfplan
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Build Java Application') {
             when {
                 expression {
@@ -44,6 +157,11 @@ parameters {
         }
 
         stage('Deploy to EC2') {
+	    when {
+		expression {
+		    params.DEPLOYMENT_MODE != 'INFRASTRUCTURE'
+		}
+	     }
             steps {
                 withCredentials([
                     sshUserPrivateKey(
@@ -75,6 +193,11 @@ EOF
         }
 
         stage('HTTP Smoke Tests') {
+	   when {
+               expression {
+                     params.DEPLOYMENT_MODE != 'INFRASTRUCTURE'
+               }
+             }
             steps {
                 sh '''
                     set -eu

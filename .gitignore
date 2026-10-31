@@ -51,6 +51,7 @@ Desktop.ini
 *.tfstate
 *.tfstate.*
 *.tfvars
+*tfplan
 *.tfplan
 crash.log
 crash.*.log
