@@ -31,25 +31,33 @@ parameters {
             }
         }
 
-        stage('Terraform Validate') {
+              stage('Terraform Validate') {
             when {
                 expression {
                     params.DEPLOYMENT_MODE == 'INFRASTRUCTURE'
                 }
             }
             steps {
-                dir('terraform') {
-                    sh '''
-                        set -eu
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-terraform-credentials',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    dir('terraform') {
+                        sh '''
+                            set +x
+                            set -eu
 
-                        terraform fmt -check -recursive
-                        terraform init -backend=false
-                        terraform validate
-                    '''
+                            terraform fmt -check -recursive
+                            terraform init -backend=false
+                            terraform validate
+                        '''
+                    }
                 }
             }
         }
-
 
         stage('Terraform Backend Init') {
             when {
