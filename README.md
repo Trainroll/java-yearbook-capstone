@@ -1,214 +1,233 @@
-# Java Yearbook DevOps Capstone
-
-An end-to-end DevOps project that deploys a Java application and a portfolio website on AWS using Infrastructure as Code, configuration management, containers, reverse proxying, and Jenkins CI/CD.
+# Java Yearbook – End-to-End DevOps Capstone
 
 ## Project Overview
 
-This project demonstrates a deployment workflow for two application components:
+This project demonstrates an end-to-end DevOps workflow for deploying a Java Yearbook application and a portfolio website on AWS.
 
-- **Java Yearbook application** — built with Maven and packaged into a Docker image.
-- **Portfolio website** — static HTML, CSS, and supporting assets served by Nginx.
+It combines Infrastructure as Code (IaC), configuration management, containerisation, CI/CD automation and application testing.
 
-Terraform provisions the infrastructure, Ansible configures the EC2 host and deploys the services, Docker Compose manages the containers, and Jenkins orchestrates the build, deployment, and HTTP smoke tests.
+The project uses **Jenkins for infrastructure provisioning with Terraform** and **GitHub Actions for automated application deployment**. Both pipelines have been implemented and tested.
 
 ## Architecture
 
-```text
-Developer
-   |
-   v
-GitHub Repository
-   |
-   v
-Jenkins CI/CD Pipeline
-   |
-   +--> Checkout source
-   |
-   +--> Verify build tools
-   |
-   +--> Build Java application with Maven
-   |
-   +--> Connect to EC2 using SSH credentials
-   |
-   +--> Run Ansible deployment playbook
-                |
-                v
-          AWS EC2 Instance
-                |
-                v
-           Docker Compose
-             /        \
-            v          v
-       Nginx          Java App
-       Portfolio      Container
-            |
-            v
-      Public HTTP traffic
-            |
-            +--> /            Portfolio website
-            +--> /yearbook/   Java application via Nginx
-```
+### Infrastructure and Application Architecture
 
-Terraform is used to provision the infrastructure separately from the application deployment pipeline.
+- AWS VPC provides the network environment.
+- Terraform provisions and manages AWS infrastructure.
+- An EC2 instance hosts the application environment.
+- Ansible automates application deployment and server configuration.
+- Docker Compose manages the containerised application services.
+- Nginx serves as the web server and reverse proxy.
+- The portfolio website and Java Yearbook application are accessible through Nginx.
+
+### CI/CD Architecture
+
+The project uses two CI/CD workflows with different responsibilities.
+
+**1. Jenkins – Infrastructure Provisioning**
+
+Jenkins automates the Terraform infrastructure workflow:
+
+1. Checks out the project repository.
+2. Verifies the required toolchain.
+3. Validates Terraform configuration.
+4. Initialises the remote S3 Terraform backend.
+5. Generates and displays a Terraform execution plan.
+6. Requests manual approval before applying changes.
+7. Applies the approved infrastructure changes.
+
+Terraform state is stored remotely in Amazon S3, with encryption, versioning and state locking enabled.
+
+**2. GitHub Actions – Application Deployment**
+
+GitHub Actions automates application deployment whenever changes are pushed to the `main` branch.
+
+The workflow:
+
+1. Checks out the latest repository code.
+2. Sets up Java 21.
+3. Builds the Java application using Maven.
+4. Executes the Ansible deployment playbook.
+5. Deploys the application to the existing AWS EC2 instance.
+6. Runs HTTP smoke tests to verify application availability.
+
+The workflow can also be triggered manually through GitHub Actions using `workflow_dispatch`.
+
+A self-hosted GitHub Actions runner runs on WSL Ubuntu and executes the deployment job.
 
 ## Technology Stack
 
-| Area | Technologies |
+| Category | Technologies |
 |---|---|
-| Cloud infrastructure | AWS EC2, VPC, subnet, internet gateway, route table, security groups |
+| Cloud Platform | Amazon Web Services (AWS) |
 | Infrastructure as Code | Terraform |
-| Configuration management | Ansible |
-| CI/CD | Jenkins |
-| Java build | Java 21, Maven |
-| Containers | Docker, Docker Compose |
-| Web server and reverse proxy | Nginx |
-| Version control | Git, GitHub |
-| Validation | Ansible syntax checks, Jenkins pipeline validation, HTTP smoke tests |
+| Configuration Management | Ansible |
+| CI/CD – Infrastructure | Jenkins |
+| CI/CD – Application | GitHub Actions |
+| Runner | GitHub Self-hosted Runner on WSL Ubuntu |
+| Application | Java 21, Maven |
+| Containerisation | Docker, Docker Compose |
+| Web Server / Reverse Proxy | Nginx |
+| Version Control | Git, GitHub |
+| Infrastructure State | Amazon S3 |
 
-## Repository Structure
+## Project Structure
 
 ```text
-java-yearbook-capstone/
-├── terraform/
-│   └── Infrastructure provisioning files
+java-yearbook-project/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
 ├── ansible/
 │   └── playbook.yml
 ├── java/
-│   ├── Dockerfile
-│   └── Maven application source and configuration
-├── myportfolio/
-│   └── Static website and avatar assets
-├── docker-compose.yml
-├── docker-compose.prod.yml
-├── nginx.conf
+│   └── pom.xml
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── output.tf
+│   └── ...
 ├── Jenkinsfile
-└── README.md
+├── docker-compose.yml
+├── README.md
+└── ...
 ```
 
-The exact contents of each directory may evolve as the project develops.
+*The structure above highlights the main project components; supporting application, Docker and Nginx files are also included in the repository.*
 
-## Deployment Modes
+## Deployment Workflows
 
-The Jenkins pipeline accepts a `DEPLOYMENT_MODE` parameter to select the deployment scope.
+### Jenkins Infrastructure Deployment
 
-| Mode | Intended behaviour |
-|---|---|
-| `JAVA` | Copies the Java application and deploys the Java service. |
-| `PORTFOLIO` | Copies the portfolio files and relevant Nginx/Compose configuration, then deploys the portfolio service. |
-| `FULL` | Deploys both the Java and portfolio services. |
+The Jenkins pipeline is responsible for provisioning and managing AWS infrastructure.
 
-Selective deployment reduces unnecessary work by targeting the component being updated. The live behaviour of each mode should be verified independently, particularly when Compose configuration changes.
+The infrastructure deployment process includes:
 
-## CI/CD Pipeline
+- Terraform formatting and validation.
+- Remote backend initialisation.
+- Terraform planning.
+- Manual approval.
+- Terraform apply.
 
-The Jenkins pipeline contains these stages:
+The pipeline uses AWS credentials configured in Jenkins rather than storing access keys in the repository.
 
-1. **Checkout SCM** — retrieves the repository from source control.
-2. **Checkout** — prepares the source workspace.
-3. **Verify Toolchain** — checks the required build tools.
-4. **Build Java Application** — builds the Java application with Maven.
-5. **Deploy to EC2** — uses SSH credentials and Ansible to execute the deployment playbook.
-6. **HTTP Smoke Tests** — checks the relevant HTTP endpoints after deployment.
+The Terraform state is maintained in an encrypted S3 backend with state locking.
 
-The pipeline uses a Jenkins-managed SSH credential rather than embedding the private key in the repository.
+### GitHub Actions Application Deployment
 
-## Application Endpoints
+The GitHub Actions workflow is defined in:
 
-The deployment exposes the portfolio and routes Java application traffic through Nginx.
+`.github/workflows/deploy.yml`
 
-| Endpoint | Purpose |
-|---|---|
-| `/` | Portfolio homepage |
-| `/avatars/avatar.png` | Portfolio avatar asset |
-| `/yearbook/` | Java application through the Nginx reverse proxy |
+The workflow is triggered by:
 
-The EC2 host uses port 80 for public HTTP traffic. The portfolio container also has a host mapping on port 8083 in the current Compose configuration.
+```yaml
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+```
 
-SSH is used for administration and deployment. Access should be restricted to trusted source addresses wherever practical.
+The deployment process is:
 
-## Validation and Test Results
+```text
+Developer pushes code to GitHub
+             |
+             v
+      GitHub Actions
+             |
+             v
+      Checkout Code
+             |
+             v
+       Setup Java 21
+             |
+             v
+       Maven Build
+             |
+             v
+     Ansible Deployment
+             |
+             v
+        AWS EC2
+             |
+             v
+      HTTP Smoke Tests
+             |
+             v
+       Deployment Result
+```
 
-The project has been validated through infrastructure and application checks.
+The GitHub Actions runner is self-hosted on WSL Ubuntu. It must be running and connected to the internet to receive deployment jobs.
 
-- Terraform configuration was previously validated and formatted.
-- Ansible playbook syntax checks passed.
-- Jenkins successfully validated the Declarative Pipeline syntax.
-- Jenkins build **#15** completed successfully.
-- The Java Maven build stage passed.
-- The Ansible deployment stage passed.
-- HTTP smoke tests passed for:
-  - `http://98.89.67.243/`
-  - `http://98.89.67.243/yearbook/`
-  - `http://98.89.67.243/avatars/avatar.png`
+The workflow currently runs the complete application deployment process on each push to `main`. It does not use Git-diff-based selective deployment.
 
-These results confirm that the listed checks passed during that build. They do not, by themselves, establish high availability, disaster recovery, or production-grade security.
+## Testing and Verification
+
+The following workflows have been executed successfully:
+
+| Test / Activity | Platform | Result |
+|---|---|---|
+| Terraform validation | Jenkins | Successful |
+| Terraform remote backend initialisation | Jenkins | Successful |
+| Terraform plan and approval | Jenkins | Successful |
+| Terraform infrastructure apply | Jenkins | Successful |
+| Java 21 setup | GitHub Actions | Successful |
+| Maven application build | GitHub Actions | Successful |
+| Ansible application deployment | GitHub Actions | Successful |
+| HTTP smoke tests | GitHub Actions | Successful |
+| GitHub self-hosted runner connection | WSL Ubuntu | Successful |
+
+The HTTP smoke tests verify the application endpoints:
+
+- `/` – Portfolio homepage.
+- `/yearbook/` – Java Yearbook application.
 
 ## Security Considerations
 
-- Keep AWS credentials, private SSH keys, Terraform state, and secret variable files out of version control.
-- Use Jenkins credentials for deployment authentication.
-- Keep SSH access restricted to trusted addresses where possible.
-- Avoid exposing application ports publicly when access through Nginx is sufficient.
-- Use least-privilege IAM permissions for infrastructure provisioning.
-- Treat Docker daemon access as privileged; use controlled privilege escalation rather than weakening Docker socket permissions.
-- Review security group ingress and egress rules before deployment.
+- AWS credentials are stored in Jenkins credentials management.
+- SSH access uses a private deployment key stored outside the Git repository.
+- Terraform state is stored in an encrypted S3 backend.
+- S3 public access is blocked.
+- Terraform state locking helps prevent concurrent state modifications.
+- Sensitive Terraform variables and local configuration files are excluded from Git.
+- The EC2 SSH security group restricts administrative access to the configured IP range.
 
-## How to Run
+## Key DevOps Concepts Demonstrated
 
-### Prerequisites
+This project demonstrates practical experience with:
 
-- AWS account and appropriately scoped AWS credentials
-- Terraform
-- Ansible
-- Jenkins with the required plugins and credentials configured
-- Docker and Docker Compose on the target EC2 host
-- Java 21 and Maven for building the application
-- Git
+- AWS infrastructure provisioning.
+- Terraform state management and remote backends.
+- Infrastructure validation, planning and controlled application.
+- Jenkins pipeline automation.
+- GitHub Actions workflow automation.
+- Self-hosted CI/CD runners.
+- Ansible configuration management and deployment.
+- Java application build automation with Maven.
+- Docker and Docker Compose.
+- Nginx reverse proxy configuration.
+- Automated HTTP smoke testing.
+- Git-based version control and deployment triggers.
 
-### Provision infrastructure
+## Future Improvements
 
-Review the Terraform variables and AWS resource configuration, then run Terraform from the appropriate infrastructure directory:
+Potential improvements include:
 
-```bash
-terraform init
-terraform fmt -check
-terraform validate
-terraform plan
-```
+- Upgrade GitHub Actions dependencies to their current supported versions.
+- Introduce path-based deployment to avoid rebuilding and redeploying unaffected application components.
+- Add automated application and integration tests.
+- Introduce deployment rollback procedures.
+- Improve monitoring, logging and alerting.
+- Strengthen deployment security and access management.
 
-Review the plan before applying it. Apply only when the proposed infrastructure changes are understood and approved.
+## Conclusion
 
-### Validate Ansible
+This capstone demonstrates two complementary CI/CD approaches.
 
-From the repository root:
+Jenkins is used to automate AWS infrastructure provisioning through Terraform, including a controlled approval and apply process.
 
-```bash
-ansible-playbook -i terraform/inventory.ini \
-  ansible/playbook.yml --syntax-check
-```
+GitHub Actions is used to automate application builds and deployments through a self-hosted runner, Ansible and HTTP smoke tests.
 
-The inventory path must exist and match the current infrastructure configuration.
-
-### Deploy with Jenkins
-
-1. Configure the repository in Jenkins.
-2. Configure the required SSH credential using the ID expected by the Jenkinsfile.
-3. Confirm that the EC2 host is reachable and its host key is verified.
-4. Run the pipeline using the desired `DEPLOYMENT_MODE`.
-5. Review the deployment logs and HTTP smoke-test results.
-
-## Limitations and Future Improvements
-
-Potential next improvements include:
-
-- Verify all three deployment modes independently.
-- Test rollback procedures and failed deployment recovery.
-- Improve deployment idempotency and avoid unnecessary host setup on every run.
-- Add application health checks and stronger post-deployment verification.
-- Review IAM permissions, network access, secret handling, and container image management.
-- Add automated linting and security scanning to the pipeline.
-
-## Project Status
-
-The Jenkins pipeline has successfully built and deployed the Java application and passed its configured HTTP smoke tests. Selective deployment modes are implemented in the current pipeline and Ansible playbook; each mode should be tested independently before the workflow is considered fully verified.
-
+Together, these workflows demonstrate how infrastructure automation and application delivery can be separated into distinct but complementary DevOps processes.
